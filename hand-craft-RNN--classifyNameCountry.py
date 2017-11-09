@@ -1,5 +1,4 @@
-part1:读入以及准备数据;
-==
+#part1:读入以及准备数据;
 import os
 from io import open
 import string
@@ -10,7 +9,6 @@ for i in range(len(fileList)):
     fileList[i]=fileList[i].split('.')[0]
 filepath='/home/ly/pytorch_exercise/data/data for classify names/'
 dic={}
-
 #不同语言之间字符编码格式转换;
 import unicodedata
 all_letters = string.ascii_letters + " .,;'-"
@@ -21,7 +19,6 @@ def unicodeToAscii(s):
         if unicodedata.category(c) != 'Mn'
         and c in all_letters
     )
-
 for files in fileList:
     dic[files]=open(filepath+files+'.txt').read().strip().split('\n')
 for files in fileList:
@@ -39,7 +36,6 @@ def wordToVec(s):
                 temp[i][j]=1
                 break
     return temp
-
 import torch
 def wordToTensor(s):
     temp=torch.zeros(len(s),1,n_letters)
@@ -53,7 +49,6 @@ def categoryToTensor(n):
     temp=torch.zeros(18)
     temp[n-1]=1
     return temp
-
 import random
 from torch.autograd import Variable
 def randomChoice():
@@ -68,8 +63,7 @@ def randomChoice():
     return target,trainData,Variable(targetTensor),Variable(trainDataTensor);
     #训练的时候每次抽一个放进去;
     
-part2:hand craft a simple RNN;
-==
+#part2:hand craft a simple RNN;
 import torch.nn as nn
 from torch.autograd import Variable
 #喂的时候是名字中的一个字符作为一个时刻喂进去的;
@@ -92,11 +86,9 @@ class RNN(nn.Module):
 n_hidden=128
 n_categories=len(dic.keys())
 rnn=RNN(n_letters,n_hidden,n_categories)
-
 criterion = nn.NLLLoss()
 
-part3:组织训练以及结果展示;
-==
+#part3:组织训练以及结果展示;
 learn_rate=0.005
 def train(categoryTensor,wordTensor):
     hidden=rnn.initHidden()
