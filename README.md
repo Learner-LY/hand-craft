@@ -10,3 +10,6 @@
 此部分会包括我自己hand-craft的一些基本模型，如CNN、RNN、LSTM、seq2seq等，会随着学习的过程慢慢添加。<br>
 
                                                                                                       --2017-11-09
+result of hand-craft-RNN--classifyNameCountry
+==
+![image](https://github.com/Learner-LY/hand-craft/raw/master/.../hand-craft-RNN--classifyNameCountryResult.png)
