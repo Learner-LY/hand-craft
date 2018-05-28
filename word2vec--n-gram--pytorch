@@ -1,0 +1,71 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import re
+import numpy as np
+import random
+
+context_size=2
+embedding_dim=10
+#data preparation;
+text_sentence='' 
+test_sentence.strip()
+test_sentence=re.split('[ ,.;:]+',test_sentence)
+test_sentence.remove('')
+vocb=set(test_sentence)
+word2id = {word: i for i, word in enumerate(vocb)}
+id2word = {word2id[word]: word for word in word2id}
+trigram = [((test_sentence[i-2], test_sentence[i-1],test_sentence[i+1],test_sentence[i+2]), test_sentence[i]) for i in range(2,len(test_sentence)-2)]
+#define the model structure;
+class NGram(nn.Module):
+    def __init__(self,vocb_size,context_size,n_dim):
+        super().__init__()
+        self.n_vocb=vocb_size
+        self.embedding=nn.Embedding(self.n_vocb,n_dim)
+        self.linear1=nn.Linear(context_size*2*n_dim,128)
+        self.linear2=nn.Linear(128,self.n_vocb)
+    def forward(self,x):
+        embed=self.embedding(x)
+        embed=embed.view(1,-1)
+        out=self.linear1(embed)
+        out=F.relu(out)
+        out=self.linear2(out)
+        return out
+  
+NGramModel=NGram(len(word2id),context_size,100)
+criterion=nn.CrossEntropyLoss()
+optimizer=optim.Adam(NGramModel.parameters())
+#begin to train;
+for epoch in range(100):
+    #loss_show=[]
+    loss_print=0
+    random.shuffle(trigram)
+    print_index=0
+    for data in trigram:
+        word,label=data
+        word=torch.LongTensor([word2id[e] for e in word])
+        label=torch.LongTensor([word2id[label]])
+        out=NGramModel(word)
+        loss=criterion(out,label)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        print_index+=1
+        loss_print=loss_print+loss
+        if print_index%40==0:
+            loss_show.append(loss_print%40)
+            loss_print=0
+            print(epoch)
+#in the test part you can show the embedding vectors or anything else,here was what i did;
+ly=[]
+for i in NGramModel.parameters():
+    ly.append(i)
+wordEmbed=ly[0].data
+def cosin(a,b):
+    return np.dot(a,b)/(np.linalg.norm(b)*np.linalg.norm(a))
+l=len(vocb)
+A=np.zeros((l,l))
+for i in range(l):
+    for j in range(l):
+        A[i,j]=cosin(wordEmbed[i],wordEmbed[j])
